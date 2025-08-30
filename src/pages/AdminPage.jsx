@@ -9,9 +9,12 @@ const AdminPage = () => {
     name: "",
     price: "",
     description: "",
-    image_url: "",
+    imageFile: null,
   });
   const [editingProduct, setEditingProduct] = useState(null);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const getSession = async () => {
@@ -30,9 +33,11 @@ const AdminPage = () => {
   }, []);
 
   const loadProducts = async () => {
+    setLoadingProducts(true);
     const { data, error } = await supabase.from("products").select("*");
     if (error) console.error(error);
     else setProducts(data);
+    setLoadingProducts(false);
   };
 
   useEffect(() => {
@@ -48,67 +53,127 @@ const AdminPage = () => {
     }
   };
 
-  const handleImageUpload = async (e, isEditing = false) => {
+  const handleImageChange = (e, isEditing = false) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const fileName = `${Date.now()}-${file.name}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("product-images")
-      .upload(fileName, file);
-
-    if (uploadError) {
-      console.error("Upload error:", uploadError.message);
-      return;
-    }
-
-    const { data } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(fileName);
-
-    const publicUrl = data.publicUrl;
-
     if (isEditing) {
-      setEditingProduct({ ...editingProduct, image_url: publicUrl });
+      setEditingProduct({ ...editingProduct, imageFile: file });
     } else {
-      setNewProduct({ ...newProduct, image_url: publicUrl });
+      setNewProduct({ ...newProduct, imageFile: file });
     }
   };
 
   const addProduct = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.from("products").insert([newProduct]);
-    if (error) console.error(error);
-    else {
+    setSaving(true);
+
+    let publicUrl = "";
+
+    if (newProduct.imageFile) {
+      setUploading(true);
+      const fileName = `${Date.now()}-${newProduct.imageFile.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, newProduct.imageFile);
+
+      if (uploadError) {
+        toast.error("Image upload failed");
+        console.error(uploadError);
+        setSaving(false);
+        setUploading(false);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+      publicUrl = data.publicUrl;
+      setUploading(false);
+    }
+
+    const { error } = await supabase.from("products").insert([
+      {
+        name: newProduct.name,
+        price: newProduct.price,
+        description: newProduct.description,
+        image_url: publicUrl,
+      },
+    ]);
+
+    if (error) {
+      console.error(error);
+      toast.error("Failed to add product");
+    } else {
       toast.success("Product added!");
-      setNewProduct({ name: "", price: "", description: "", image_url: "" });
+      setNewProduct({ name: "", price: "", description: "", imageFile: null });
       loadProducts();
     }
+
+    setSaving(false);
   };
 
   const updateProduct = async (e) => {
     e.preventDefault();
+    setSaving(true);
+
+    let publicUrl = editingProduct.image_url;
+
+    if (editingProduct.imageFile) {
+      setUploading(true);
+      const fileName = `${Date.now()}-${editingProduct.imageFile.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, editingProduct.imageFile);
+
+      if (uploadError) {
+        toast.error("Image upload failed");
+        console.error(uploadError);
+        setSaving(false);
+        setUploading(false);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+      publicUrl = data.publicUrl;
+      setUploading(false);
+    }
+
     const { error } = await supabase
       .from("products")
-      .update(editingProduct)
+      .update({
+        name: editingProduct.name,
+        price: editingProduct.price,
+        description: editingProduct.description,
+        image_url: publicUrl,
+      })
       .eq("id", editingProduct.id);
 
-    if (error) console.error(error);
-    else {
+    if (error) {
+      console.error(error);
+      toast.error("Failed to update product");
+    } else {
       toast.success("Product updated!");
       setEditingProduct(null);
       loadProducts();
     }
+
+    setSaving(false);
   };
 
   const deleteProduct = async (id) => {
+    setSaving(true);
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) console.error(error);
     else {
       toast.success("Product deleted!");
       loadProducts();
     }
+    setSaving(false);
   };
 
   const login = async (e) => {
@@ -179,29 +244,38 @@ const AdminPage = () => {
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => handleImageUpload(e, !!editingProduct)}
+          onChange={(e) => handleImageChange(e, !!editingProduct)}
         />
-        <button type="submit">
-          {editingProduct ? "Update Product" : "Add Product"}
+
+        <button type="submit" disabled={saving || uploading}>
+          {saving
+            ? "Saving..."
+            : editingProduct
+            ? "Update Product"
+            : "Add Product"}
         </button>
       </form>
 
       <h3>Products</h3>
-      <ul>
-        {products.length > 0 &&
-          products.map((p) => (
-            <li key={p.id}>
-              {p.image_url ? (
-                <img src={p.image_url} alt={p.name} width="50" />
-              ) : (
-                <span>No image</span>
-              )}
-              {p.name} - ${p.price}
-              <button onClick={() => setEditingProduct(p)}>Edit</button>
-              <button onClick={() => deleteProduct(p.id)}>Delete</button>
-            </li>
-          ))}
-      </ul>
+      {loadingProducts ? (
+        <p>Loading products...</p>
+      ) : (
+        <ul>
+          {products.length > 0 &&
+            products.map((p) => (
+              <li key={p.id}>
+                {p.image_url ? (
+                  <img src={p.image_url} alt={p.name} width="50" />
+                ) : (
+                  <span>No image</span>
+                )}
+                {p.name} - ${p.price}
+                <button onClick={() => setEditingProduct(p)}>Edit</button>
+                <button onClick={() => deleteProduct(p.id)}>Delete</button>
+              </li>
+            ))}
+        </ul>
+      )}
     </div>
   );
 };
