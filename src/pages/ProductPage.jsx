@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import supabase from "../supabase/supabaseClient";
-import { useCart } from "../App";
+import { useCart } from "../context/CartContext";
 
 const ProductsPage = () => {
   const { cart, setCart } = useCart();

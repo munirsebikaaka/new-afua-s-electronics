@@ -1,5 +1,5 @@
+import { useCart } from "../context/CartContext";
 
-import { useCart } from "../App";
 const CartPage = () => {
   const { cart, setCart } = useCart();
 
