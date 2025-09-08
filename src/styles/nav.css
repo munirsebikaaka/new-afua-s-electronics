@@ -1,0 +1,35 @@
+.app-nav,
+.details-nav {
+  align-items: center;
+  border-bottom: 0.5px solid #898989;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 30px 0;
+  background-color: var(--homebackground);
+}
+
+.menu {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+.app-nav ul,
+.details-nav ul {
+  align-items: center;
+  display: flex;
+  gap: 30px;
+  list-style: none;
+}
+
+nav .nav-link {
+  color: var(--mainColor);
+  font-family: var(--font-family);
+  font-size: var(--btn-size);
+  font-weight: var(--btn-weight);
+  letter-spacing: var(--btn-spacing);
+  line-height: 25px;
+  text-decoration: none;
+  transition: all 0.5s;
+}

@@ -1,7 +1,4 @@
-const HomePage = () => (
-  <div>
-    <h2>Welcome to My Electronics Shop</h2>
-    <p>Find the best phones, laptops, and accessories!</p>
-  </div>
-);
+const HomePage = () => {
+  return <div>munir's homepage</div>;
+};
 export default HomePage;

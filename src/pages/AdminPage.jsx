@@ -194,28 +194,41 @@ const AdminPage = () => {
 
   if (!session) {
     return (
-      <div>
-        <h2>Admin Login</h2>
-        <form onSubmit={login}>
-          <input type="email" name="email" placeholder="Email" required />
+      <div className="admin-container">
+        <h2 className="admin-title">Admin Login</h2>
+        <form onSubmit={login} className="admin-login-form">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
+            className="input-field"
+          />
           <input
             type="password"
             name="password"
             placeholder="Password"
             required
+            className="input-field"
           />
-          <button type="submit">Login</button>
+          <button type="submit" className="btn-primary">
+            Login
+          </button>
         </form>
       </div>
     );
   }
 
   return (
-    <div>
-      <h2>Admin Panel</h2>
-      <button onClick={logout}>Logout</button>
+    <div className="admin-panel-container">
+      <h2 className="admin-panel-title">Admin Panel</h2>
+      <button onClick={logout} className="btn-logout">
+        Logout
+      </button>
 
-      <form onSubmit={editingProduct ? updateProduct : addProduct}>
+      <form
+        onSubmit={editingProduct ? updateProduct : addProduct}
+        className="product-form">
         <input
           type="text"
           name="name"
@@ -223,6 +236,7 @@ const AdminPage = () => {
           value={editingProduct ? editingProduct.name : newProduct.name}
           onChange={handleChange}
           required
+          className="input-field"
         />
         <input
           type="number"
@@ -231,6 +245,7 @@ const AdminPage = () => {
           value={editingProduct ? editingProduct.price : newProduct.price}
           onChange={handleChange}
           required
+          className="input-field"
         />
         <textarea
           name="description"
@@ -240,14 +255,19 @@ const AdminPage = () => {
           }
           onChange={handleChange}
           required
+          className="textarea-field"
         />
         <input
           type="file"
           accept="image/*"
           onChange={(e) => handleImageChange(e, !!editingProduct)}
+          className="file-input"
         />
 
-        <button type="submit" disabled={saving || uploading}>
+        <button
+          type="submit"
+          disabled={saving || uploading}
+          className="btn-submit">
           {saving
             ? "Saving..."
             : editingProduct
@@ -256,22 +276,36 @@ const AdminPage = () => {
         </button>
       </form>
 
-      <h3>Products</h3>
+      <h3 className="products-title">Products</h3>
       {loadingProducts ? (
         <p>Loading products...</p>
       ) : (
-        <ul>
+        <ul className="products-list">
           {products.length > 0 &&
             products.map((p) => (
-              <li key={p.id}>
+              <li key={p.id} className="product-item">
                 {p.image_url ? (
-                  <img src={p.image_url} alt={p.name} width="50" />
+                  <img
+                    src={p.image_url}
+                    alt={p.name}
+                    className="product-image"
+                  />
                 ) : (
-                  <span>No image</span>
+                  <span className="no-image">No image</span>
                 )}
-                {p.name} - ${p.price}
-                <button onClick={() => setEditingProduct(p)}>Edit</button>
-                <button onClick={() => deleteProduct(p.id)}>Delete</button>
+                <span className="product-name">
+                  {p.name} - ${p.price}
+                </span>
+                <button
+                  onClick={() => setEditingProduct(p)}
+                  className="btn-edit">
+                  Edit
+                </button>
+                <button
+                  onClick={() => deleteProduct(p.id)}
+                  className="btn-delete">
+                  Delete
+                </button>
               </li>
             ))}
         </ul>
