@@ -1,0 +1,21 @@
+.goback {
+  margin: 0 auto;
+  max-width: 1100px;
+}
+
+.goback .link {
+  background-color: inherit;
+  border: none;
+  color: var(--blackColor);
+  cursor: pointer;
+  display: inline-block;
+  font-family: var(--font-family);
+  font-size: var(--paragraph-size);
+  font-weight: 500;
+  line-height: var(--paragraph-line-height);
+  margin-bottom: 40px;
+  margin-top: 60px;
+  opacity: var(--opacity);
+  text-decoration: none;
+  transition: all 0.5s;
+}

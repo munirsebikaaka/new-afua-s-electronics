@@ -83,14 +83,12 @@ p {
 }
 
 .product-section-alone {
-  /* grid-gap: 100px; */
   align-items: center;
   display: grid;
   gap: 100px;
   grid-template-columns: 1fr 1fr;
   margin: 120px auto 0;
   max-width: 1100px;
-  border: 5px solid red;
 }
 
 .about {
@@ -101,7 +99,7 @@ p {
 }
 
 .about h4 {
-  color: var(--blackColor);
+  color: var(--hoverBtn);
   font-size: 14px;
   font-weight: 400;
   letter-spacing: 10px;
@@ -110,7 +108,9 @@ p {
 
 .about h1 {
   font-size: 40px;
+  text-transform: uppercase;
   font-weight: var(--weight);
+  color: var(--homebackground);
   letter-spacing: 1.4285714626312256px;
   line-height: 44px;
 }

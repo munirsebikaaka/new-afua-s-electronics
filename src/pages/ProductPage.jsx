@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // for navigation
 import supabase from "../supabase/supabaseClient";
-import { useCart } from "../context/CartContext";
 
 const ProductsPage = () => {
-  const { cart, setCart } = useCart();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -14,7 +13,9 @@ const ProductsPage = () => {
   // pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 6; // products per page
+  const limit = 20; // ✅ show 20 products per page
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -54,10 +55,6 @@ const ProductsPage = () => {
     loadProducts();
   }, [search, sort, page]);
 
-  const addToCart = (product) => {
-    setCart([...cart, product]);
-  };
-
   return (
     <div>
       <h2>Products</h2>
@@ -69,7 +66,7 @@ const ProductsPage = () => {
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            setPage(1); // reset page when searching
+            setPage(1);
           }}
         />
 
@@ -94,11 +91,13 @@ const ProductsPage = () => {
           {products.map((p) => (
             <div
               key={p.id}
+              onClick={() => navigate(`/products/${p.id}`)} // ✅ go to details
               style={{
                 border: "1px solid #ddd",
                 borderRadius: "8px",
                 padding: "12px",
                 textAlign: "center",
+                cursor: "pointer",
               }}>
               {p.image_url ? (
                 <img
@@ -128,7 +127,7 @@ const ProductsPage = () => {
 
               <h3>{p.name}</h3>
               <p>${p.price}</p>
-              <button onClick={() => addToCart(p)}>Add to Cart</button>
+              <button className="head-products">View Details</button>
             </div>
           ))}
         </div>
