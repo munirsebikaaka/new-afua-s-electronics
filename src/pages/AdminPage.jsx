@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import supabase from "../supabase/supabaseClient";
 import { toast } from "react-toastify";
+import "../styles/adminPanel.css";
 
 const AdminPage = () => {
   const [session, setSession] = useState(null);
@@ -64,22 +65,22 @@ const AdminPage = () => {
     }
   };
 
-  const addProduct = async (e) => {
+  const addOrUpdateProduct = async (e) => {
     e.preventDefault();
     setSaving(true);
 
-    let publicUrl = "";
+    const productData = editingProduct || newProduct;
+    let publicUrl = productData.image_url || "";
 
-    if (newProduct.imageFile) {
+    if (productData.imageFile) {
       setUploading(true);
-      const fileName = `${Date.now()}-${newProduct.imageFile.name}`;
+      const fileName = `${Date.now()}-${productData.imageFile.name}`;
       const { error: uploadError } = await supabase.storage
         .from("product-images")
-        .upload(fileName, newProduct.imageFile);
+        .upload(fileName, productData.imageFile);
 
       if (uploadError) {
         toast.error("Image upload failed");
-        console.error(uploadError);
         setSaving(false);
         setUploading(false);
         return;
@@ -93,87 +94,46 @@ const AdminPage = () => {
       setUploading(false);
     }
 
-    const { error } = await supabase.from("products").insert([
-      {
-        name: newProduct.name,
-        price: newProduct.price,
-        description: newProduct.description,
-        image_url: publicUrl,
-      },
-    ]);
+    if (editingProduct) {
+      const { error } = await supabase
+        .from("products")
+        .update({
+          name: editingProduct.name,
+          price: editingProduct.price,
+          description: editingProduct.description,
+          image_url: publicUrl,
+        })
+        .eq("id", editingProduct.id);
 
-    if (error) {
-      console.error(error);
-      toast.error("Failed to add product");
-    } else {
-      toast.success("Product added!");
-      setNewProduct({ name: "", price: "", description: "", imageFile: null });
-      loadProducts();
-    }
-
-    setSaving(false);
-  };
-
-  const updateProduct = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-
-    let publicUrl = editingProduct.image_url;
-
-    if (editingProduct.imageFile) {
-      setUploading(true);
-      const fileName = `${Date.now()}-${editingProduct.imageFile.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(fileName, editingProduct.imageFile);
-
-      if (uploadError) {
-        toast.error("Image upload failed");
-        console.error(uploadError);
-        setSaving(false);
-        setUploading(false);
-        return;
-      }
-
-      const { data } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(fileName);
-
-      publicUrl = data.publicUrl;
-      setUploading(false);
-    }
-
-    const { error } = await supabase
-      .from("products")
-      .update({
-        name: editingProduct.name,
-        price: editingProduct.price,
-        description: editingProduct.description,
-        image_url: publicUrl,
-      })
-      .eq("id", editingProduct.id);
-
-    if (error) {
-      console.error(error);
-      toast.error("Failed to update product");
-    } else {
-      toast.success("Product updated!");
+      if (error) toast.error("Failed to update product");
+      else toast.success("Product updated!");
       setEditingProduct(null);
-      loadProducts();
+    } else {
+      const { error } = await supabase.from("products").insert([
+        {
+          name: newProduct.name,
+          price: newProduct.price,
+          description: newProduct.description,
+          image_url: publicUrl,
+        },
+      ]);
+
+      if (error) toast.error("Failed to add product");
+      else toast.success("Product added!");
+      setNewProduct({ name: "", price: "", description: "", imageFile: null });
     }
 
+    loadProducts();
     setSaving(false);
   };
 
   const deleteProduct = async (id) => {
-    setSaving(true);
     const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) console.error(error);
+    if (error) toast.error("Failed to delete product");
     else {
       toast.success("Product deleted!");
       loadProducts();
     }
-    setSaving(false);
   };
 
   const login = async (e) => {
@@ -194,7 +154,7 @@ const AdminPage = () => {
 
   if (!session) {
     return (
-      <div className="admin-container">
+      <div className="admin-login-container">
         <h2 className="admin-title">Admin Login</h2>
         <form onSubmit={login} className="admin-login-form">
           <input
@@ -220,96 +180,113 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="admin-panel-container">
-      <h2 className="admin-panel-title">Admin Panel</h2>
-      <button onClick={logout} className="btn-logout">
-        Logout
-      </button>
-
-      <form
-        onSubmit={editingProduct ? updateProduct : addProduct}
-        className="product-form">
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={editingProduct ? editingProduct.name : newProduct.name}
-          onChange={handleChange}
-          required
-          className="input-field"
-        />
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          value={editingProduct ? editingProduct.price : newProduct.price}
-          onChange={handleChange}
-          required
-          className="input-field"
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={
-            editingProduct ? editingProduct.description : newProduct.description
-          }
-          onChange={handleChange}
-          required
-          className="textarea-field"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleImageChange(e, !!editingProduct)}
-          className="file-input"
-        />
-
-        <button
-          type="submit"
-          disabled={saving || uploading}
-          className="btn-submit">
-          {saving
-            ? "Saving..."
-            : editingProduct
-            ? "Update Product"
-            : "Add Product"}
+    <div className="admin-panel">
+      <header className="admin-header">
+        <h1 className="admin-title">Admin Dashboard</h1>
+        <button onClick={logout} className="btn-logout">
+          Logout
         </button>
-      </form>
+      </header>
 
-      <h3 className="products-title">Products</h3>
-      {loadingProducts ? (
-        <p>Loading products...</p>
-      ) : (
-        <ul className="products-list">
-          {products.length > 0 &&
-            products.map((p) => (
-              <li key={p.id} className="product-item">
-                {p.image_url ? (
-                  <img
-                    src={p.image_url}
-                    alt={p.name}
-                    className="product-image"
-                  />
-                ) : (
-                  <span className="no-image">No image</span>
-                )}
-                <span className="product-name">
-                  {p.name} - ${p.price}
-                </span>
-                <button
-                  onClick={() => setEditingProduct(p)}
-                  className="btn-edit">
-                  Edit
-                </button>
-                <button
-                  onClick={() => deleteProduct(p.id)}
-                  className="btn-delete">
-                  Delete
-                </button>
-              </li>
-            ))}
-        </ul>
-      )}
+      <div className="admin-content">
+        {/* Left: form */}
+        <section className="admin-form-section">
+          <h2>{editingProduct ? "Edit Product" : "Add New Product"}</h2>
+          <form onSubmit={addOrUpdateProduct} className="product-form">
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              value={editingProduct ? editingProduct.name : newProduct.name}
+              onChange={handleChange}
+              required
+              className="input-field"
+            />
+            <input
+              type="number"
+              name="price"
+              placeholder="Price"
+              value={editingProduct ? editingProduct.price : newProduct.price}
+              onChange={handleChange}
+              required
+              className="input-field"
+            />
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={
+                editingProduct
+                  ? editingProduct.description
+                  : newProduct.description
+              }
+              onChange={handleChange}
+              required
+              className="textarea-field"
+            />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageChange(e, !!editingProduct)}
+              className="file-input"
+            />
+            <button
+              type="submit"
+              disabled={saving || uploading}
+              className="btn-submit">
+              {saving
+                ? "Saving..."
+                : editingProduct
+                ? "Update Product"
+                : "Add Product"}
+            </button>
+          </form>
+        </section>
+
+        {/* Right: products */}
+        <section className="admin-products-section">
+          <h2>Products</h2>
+          {loadingProducts ? (
+            <p>Loading products...</p>
+          ) : (
+            <div className="products-grid">
+              {products.length > 0 ? (
+                products.map((p) => (
+                  <div key={p.id} className="product-card">
+                    {p.image_url ? (
+                      <img
+                        src={p.image_url}
+                        alt={p.name}
+                        className="product-image"
+                      />
+                    ) : (
+                      <div className="no-image">No image</div>
+                    )}
+                    <div className="product-info">
+                      <h3>{p.name}</h3>
+                      <p>${p.price}</p>
+                      <p className="desc">{p.description}</p>
+                    </div>
+                    <div className="product-actions">
+                      <button
+                        onClick={() => setEditingProduct(p)}
+                        className="btn-edit">
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteProduct(p.id)}
+                        className="btn-delete">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>No products found.</p>
+              )}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 };

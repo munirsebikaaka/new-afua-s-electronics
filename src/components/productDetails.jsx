@@ -11,7 +11,7 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
 
-  const phoneNumber = "256742083075"; // Your WhatsApp number in international format
+  const phoneNumber = "256742083075";
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -68,52 +68,50 @@ const ProductDetails = () => {
   };
 
   if (isLoading) {
-    return <p>Loading product...</p>;
+    return <p className="loading-text">Loading product...</p>;
   }
 
   if (!product) {
-    return <p>No product found.</p>;
+    return <p className="loading-text">No product found.</p>;
   }
 
   return (
-    <div>
+    <div className="product-page">
       <div className="goback">
         <Link className="link" to="/products">
-          Go Back
+          ← Go Back
         </Link>
       </div>
 
-      <div className="product-section-alone">
+      <div className="product-section">
         <div className="img-container">
           <img
             src={product.image_url || "img.jpeg"}
-            className="product-image-alone"
+            className="product-image"
             alt={product.name}
           />
         </div>
 
         <div className="about">
-          <h4>NEW PRODUCTS</h4>
-          <h1>{product.name}</h1>
-          <p>{product.description}</p>
-          <h2>${product.price}</h2>
+          <h4 className="new-label">NEW PRODUCTS</h4>
+          <h1 className="product-title">{product.name}</h1>
+          <p className="product-description">{product.description}</p>
+          <h2 className="product-price">${product.price}</h2>
 
-          <div className="dets-btns">
-            <button onClick={addToCart} className="add-to-cart-btn">
+          <div className="btn-group">
+            <button onClick={addToCart} className="btn add-to-cart">
               Add to Cart
             </button>
-
-            <button onClick={handleSendMessage} className="head-products">
+            <button onClick={handleSendMessage} className="btn outline-btn">
               Send a Message
             </button>
           </div>
         </div>
       </div>
 
-      {/* Related products */}
       {relatedProducts.length > 0 && (
         <div className="related-section">
-          <h2>Related Products</h2>
+          <h2 className="related-title">Related Products</h2>
           <div className="related-grid">
             {relatedProducts.map((rp) => (
               <div key={rp.id} className="related-card">
@@ -123,8 +121,8 @@ const ProductDetails = () => {
                     alt={rp.name}
                     className="related-img"
                   />
-                  <h3>{rp.name}</h3>
-                  <p>${rp.price}</p>
+                  <h3 className="related-name">{rp.name}</h3>
+                  <p className="related-price">${rp.price}</p>
                 </Link>
               </div>
             ))}

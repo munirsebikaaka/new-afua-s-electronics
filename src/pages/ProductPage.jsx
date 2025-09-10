@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // for navigation
+import { useNavigate } from "react-router-dom";
 import supabase from "../supabase/supabaseClient";
+import "../styles/products.css";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // filters
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("asc");
 
-  // pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 20; // ✅ show 20 products per page
+  const limit = 12;
 
   const navigate = useNavigate();
 
@@ -23,18 +22,14 @@ const ProductsPage = () => {
 
       const from = (page - 1) * limit;
       const to = from + limit - 1;
-
       let query = supabase.from("products").select("*", { count: "exact" });
 
-      // search
       if (search) {
         query = query.ilike("name", `%${search}%`);
       }
 
-      // sort
       query = query.order("price", { ascending: sort === "asc" });
 
-      // pagination
       query = query.range(from, to);
 
       const { data, error, count } = await query;
@@ -56,11 +51,25 @@ const ProductsPage = () => {
   }, [search, sort, page]);
 
   return (
-    <div>
-      <h2>Products</h2>
+    <div className="products-container">
+      <div className="products-hero">
+        <video
+          className="hero-video"
+          autoPlay
+          loop
+          muted
+          playsInline
+          src="tests.mp4"
+        />
+        <div className="hero-content">
+          <h1>Welcome to Munir's Electronics</h1>
+          <p>Your one-stop shop for the latest electronics and gadgets.</p>
+        </div>
+      </div>
 
-      {/* filters */}
-      <div style={{ marginBottom: "20px" }}>
+      <h2 className="products-title">Products</h2>
+
+      <div className="products-filters">
         <input
           placeholder="Search products..."
           value={search}
@@ -69,89 +78,46 @@ const ProductsPage = () => {
             setPage(1);
           }}
         />
-
         <select value={sort} onChange={(e) => setSort(e.target.value)}>
           <option value="asc">Price: Low → High</option>
           <option value="desc">Price: High → Low</option>
         </select>
       </div>
 
-      {/* product list */}
       {isLoading ? (
-        <p>Loading...</p>
+        <p className="loading-text">Loading...</p>
       ) : products.length === 0 ? (
-        <p>No products found.</p>
+        <p className="loading-text">No products found.</p>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gap: "15px",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          }}>
+        <div className="products-grid">
           {products.map((p) => (
             <div
               key={p.id}
-              onClick={() => navigate(`/products/${p.id}`)} // ✅ go to details
-              style={{
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                padding: "12px",
-                textAlign: "center",
-                cursor: "pointer",
-              }}>
+              className="product-card"
+              onClick={() => navigate(`/products/${p.id}`)}>
               {p.image_url ? (
-                <img
-                  src={p.image_url}
-                  alt={p.name}
-                  style={{
-                    width: "100%",
-                    height: "150px",
-                    objectFit: "cover",
-                    borderRadius: "6px",
-                    marginBottom: "8px",
-                  }}
-                />
+                <img src={p.image_url} alt={p.name} className="product-img" />
               ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "150px",
-                    background: "#eee",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
-                  No Image
-                </div>
+                <div className="product-placeholder">No Image</div>
               )}
 
-              <h3>{p.name}</h3>
-              <p>${p.price}</p>
-              <button className="head-products">View Details</button>
+              <h3 className="product-name">{p.name}</h3>
+              <p className="product-price">${p.price}</p>
+              <button className="product-btn">View Details</button>
             </div>
           ))}
         </div>
       )}
 
-      {/* pagination */}
-      <div
-        style={{
-          marginTop: "20px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "12px",
-        }}>
+      <div className="products-pagination">
         <button
           onClick={() => setPage((p) => Math.max(p - 1, 1))}
           disabled={page === 1}>
           ⬅ Previous
         </button>
-
         <span>
           Page {page} of {totalPages}
         </span>
-
         <button
           onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
           disabled={page === totalPages}>

@@ -1,46 +1,58 @@
-import { MdOutlineShoppingCart } from "react-icons/md";
-import "./styles/nav.css";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { MdOutlineShoppingCart } from "react-icons/md";
+import { HiMenuAlt3, HiX } from "react-icons/hi";
+import "./styles/nav.css";
 
 const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="app-nav-cell">
-      <nav className="app-nav">
-        <div className="menu">
-          <h1>
-            <strong>MUNIR'S ELECTRONICS</strong>
-          </h1>
+    <header className="navbar-container">
+      <nav className="navbar">
+        <div className="navbar-logo">
+          <h1>MUNIR'S ELECTRONICS</h1>
         </div>
-        <ul className="hide-links">
+
+        <ul className={`navbar-links ${isOpen ? "active" : ""}`}>
           <li>
-            <Link to={"/"} className="nav-link active">
+            <Link to="/" onClick={() => setIsOpen(false)}>
               HOME
             </Link>
           </li>
           <li>
-            <Link className="nav-link" to={"products"}>
+            <Link to="/products" onClick={() => setIsOpen(false)}>
               PRODUCTS
             </Link>
           </li>
           <li>
-            <Link className="nav-link" to={"cart"}>
+            <Link to="/cart" onClick={() => setIsOpen(false)}>
               CART
             </Link>
           </li>
           <li>
-            <Link className="nav-link" to={"admin"}>
-              ADIMIL PANEL
+            <Link to="/admin" onClick={() => setIsOpen(false)}>
+              ADMIN PANEL
             </Link>
           </li>
           <li>
-            <Link className="nav-link" to={"details"}>
-              product setails
+            <Link to="/details" onClick={() => setIsOpen(false)}>
+              PRODUCT DETAILS
             </Link>
           </li>
         </ul>
-        <MdOutlineShoppingCart />
+
+        <div className="navbar-icons">
+          <MdOutlineShoppingCart className="cart-icon" />
+          <button
+            className="navbar-toggle"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu">
+            {isOpen ? <HiX /> : <HiMenuAlt3 />}
+          </button>
+        </div>
       </nav>
-    </div>
+    </header>
   );
 };
 
