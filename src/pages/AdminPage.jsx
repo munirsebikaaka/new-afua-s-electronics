@@ -264,7 +264,7 @@ const AdminPage = () => {
                     <div className="product-info">
                       <h3>{p.name}</h3>
                       <p>${p.price}</p>
-                      <p className="desc">{p.description}</p>
+                      {/* <p className="desc">{p.description}</p> */}
                     </div>
                     <div className="product-actions">
                       <button

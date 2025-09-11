@@ -11,7 +11,7 @@ const Navbar = () => {
     <header className="navbar-container">
       <nav className="navbar">
         <div className="navbar-logo">
-          <h1>MUNIR'S ELECTRONICS</h1>
+          <h1>MUN'S ELECTRONICS</h1>
         </div>
 
         <ul className={`navbar-links ${isOpen ? "active" : ""}`}>
@@ -40,10 +40,15 @@ const Navbar = () => {
               PRODUCT DETAILS
             </Link>
           </li>
+
+          <li>
+            <Link to={"/cart"} onClick={() => setIsOpen(false)}>
+              <MdOutlineShoppingCart className="cart-icon" />
+            </Link>
+          </li>
         </ul>
 
         <div className="navbar-icons">
-          <MdOutlineShoppingCart className="cart-icon" />
           <button
             className="navbar-toggle"
             onClick={() => setIsOpen(!isOpen)}

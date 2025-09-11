@@ -64,6 +64,7 @@ p {
   opacity: var(--opacity);
   font-weight: var(--paragraph-weight);
   line-height: var(--paragraph-line-height);
+  letter-spacing: 1.2px;
 }
 
 .img-container {

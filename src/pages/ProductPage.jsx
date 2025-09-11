@@ -64,6 +64,17 @@ const ProductsPage = () => {
         <div className="hero-content">
           <h1>Welcome to Munir's Electronics</h1>
           <p>Your one-stop shop for the latest electronics and gadgets.</p>
+          <p>
+            At Munirs Electronics, we bring you a wide range of reliable
+            products designed to make everyday life easier. From high-quality
+            refrigerators, televisions, and all other
+            <strong>
+              <em>Electronics</em>
+            </strong>
+            you have ever imagined of. Our collection is carefully selected to
+            combine performance, durability, and affordability — ensuring you
+            always get the best value.
+          </p>
         </div>
       </div>
 
